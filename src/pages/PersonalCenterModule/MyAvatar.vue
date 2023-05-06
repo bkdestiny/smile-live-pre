@@ -4,7 +4,7 @@
 			position: relative;left: 150px;
 			top:100px;float: left;
 			border:2px solid green">
-			<img :src="avatarUrl(currentUser.avatar)" style="width: 140px;height: 140px;"/></div>
+			<img :src="imageUrl(currentUser.avatar)" style="width: 140px;height: 140px;"/></div>
 		<div style="display: inline-block;position: relative;left: 350px;top:100px;float: left;">
 			<!--上传头像-->
 		<el-upload 
@@ -94,8 +94,8 @@
 			}
 		},
 		methods:{
-			avatarUrl(filename){
-				return "/api/user/avatar?filename="+filename;
+			imageUrl(path){
+				return "/api/file/image?path="+path;
 			},
 			successUpload(response,file,filelist){
 				console.log("res--》",response)

@@ -50,7 +50,7 @@
 					</div>
 					</div>
 		<el-avatar slot="reference"
-		:src="avatar"
+		:src="avatar()"
 		style="display: inline-block;position:relative;float:left;top: 10px;cursor: pointer;">
 		</el-avatar>
 		</el-popover>
@@ -157,9 +157,6 @@
 		},
 		computed:{
 			...mapState(['currentUser']),
-			avatar(){
-				return "/api/user/avatar?filename="+this.currentUser.avatar;
-			}
 		},
 		watch:{
 			loginMode(){
@@ -173,8 +170,8 @@
 			}
 		},
 		methods:{
-			avatarUrl(filename){
-				return "/api/user/avatar?filename="+filename;
+			avatar(){
+				return "/api/file/image?path="+this.currentUser.avatar;
 			},
 			handlerSearch(){
 				this.$message.info('搜索功能')
@@ -199,7 +196,6 @@
 							localStorage.setItem("token",response.data.data)
 							this.$store.dispatch('aCurrentUser')
 							this.loginFormVisible=false
-							location.reload()
 						}else{
 							this.$message.info(response.data.message)
 						}

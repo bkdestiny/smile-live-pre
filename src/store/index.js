@@ -17,21 +17,34 @@ const actions={
   			}).then(
   				response=>{
   					if(response.data.success){
-  						console.log('自动登录')
   						context.commit('mCurrentUser',response.data.data)
-  					}else{
-  						localStorage.removeItem("token")
-  						console.log(response.data.error)
   					}
   				}
   			)
   		}
 	},
+	aGiftByValueAsc(context){
+		axios({
+			method:'GET',
+			url:'/api/gift/queryByValueAsc'
+		}).then(
+			response=>{
+				if(response.data.success){
+					context.commit('mGiftByValueAsc',response.data.data)
+				}else{
+					console.log('获取礼物列表失败')
+				}
+			}
+		)
+	}
 }
 //用于操作数据
 const mutations={
 	mCurrentUser(state,data){
 		state.currentUser=data
+	},
+	mGiftByValueAsc(state,data){
+		state.giftData=data
 	},
 
 	
@@ -51,6 +64,7 @@ const getters={
 }
 const state={
 	currentUser:null,
+	giftData:null
 }
 
 export default new Vuex.Store({

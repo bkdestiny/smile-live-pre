@@ -16,7 +16,7 @@
 				<div class="showlive-isLive" v-if="l.live" style="background-color: rgba(73,122,238,0.7);">直播中</div>
 				<div class="showlive-isLive" v-else style="background-color: rgba(254,65,42,0.7)">未开播</div>
 				<!--直播间封面-->
-				<img :src="coverUrl(l.cover)"
+				<img :src="imageUrl(l.cover)"
 					style="width: 100%;height: 155px;cursor: pointer;"
 					@click="intoLiveroom(l.id)"
 					:fit="cover"
@@ -31,7 +31,7 @@
 						<!--主播头像-->
 						<el-avatar 
 							:size="30"
-							:src="avatarUrl(l.avatar)"
+							:src="imageUrl(l.avatar)"
 							style="position: relative;left: 5px;margin: 5px;float: left;"
 							></el-avatar>
 							<div style="display: inline-block;
@@ -44,18 +44,18 @@
 									position: relative;
 									float: left;
 									top:15px;
-									left: 35px;
+									left: 30%;
 									color:grey;
 									">
 									<img style="width: 18px;height: 17px;display: inline-block;float: left;" src="../../assets/img/see.png" />
-									5w
+									{{l.viewer}}
 								</div>
 								<div
 									style="display: inline-block;
 									float: left;
 									position: relative;
 									top:15px;
-									left: 43px;
+									left: 40%;
 									font-size: 12px;
 									color:orange;
 									"
@@ -100,11 +100,8 @@
 				}
 			)
 			},
-			avatarUrl(filename){
-				return 'api/user/avatar?filename='+filename;
-			},
-			coverUrl(filename){
-				return 'api/liveroom/cover?filename='+filename
+			imageUrl(path){
+				return 'api/file/image?path='+path
 			},
 			intoLiveroom(id){
 				console.log("id-->", id)
