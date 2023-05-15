@@ -18,7 +18,7 @@
 				<!--直播间封面-->
 				<img :src="imageUrl(l.cover)"
 					style="width: 100%;height: 155px;cursor: pointer;"
-					@click="intoLiveroom(l.id)"
+					@click="aIntoLiveRoom(l.userId)"
 					:fit="cover"
 					></img>
 					<div class="showlive-item-title"
@@ -68,7 +68,7 @@
 </template>
 
 <script>
-	import {mapState} from 'vuex'
+	import {mapState,mapActions} from 'vuex'
 	export default{
 		name:'HomeBody',
 		data(){
@@ -85,6 +85,7 @@
 			...mapState('mapState')
 		},
 		methods:{
+			...mapActions(['aIntoLiveRoom']),
 			initData(){
 			this.$axios({
 				method:'POST',
@@ -103,15 +104,6 @@
 			imageUrl(path){
 				return 'api/file/image?path='+path
 			},
-			intoLiveroom(id){
-				console.log("id-->", id)
-				this.$router.push({
-					name:'live',
-					query:{
-						liveId:id
-					}
-				})
-			}
 		}
 	}
 </script>

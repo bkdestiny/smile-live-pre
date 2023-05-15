@@ -21,6 +21,20 @@
 						<p id="live-left-info-username">{{liveInfo.nickname}}</p>
 						</div>
 					</div>
+					<div style="width: 120px;height: 25px;
+						line-height:25px;position: absolute;right: 20px;top:15px;
+						background: lightgray;border-radius: 15px;
+						">
+						<div style="font-size: 12px;color:gray;
+							width:60px;color:white;display: inline-block;
+							text-align: center;">{{liveInfo.followCount}}</div>
+						<button v-if="!liveInfo.follow" @click="aFollowLive(liveInfo)" 
+							class="followBtn"
+							 style="background: #409EFF;color:white;">关注</button>
+						<button v-else @click="aCancelFollowLive(liveInfo)" class="followBtn" 
+							style="background:darkgrey;color:white;">已关注</button>
+					</div>
+					<!--观看人数-->
 					<div style="position: absolute;right: 20px;bottom: 15px;">
 						<img  src="../../assets/img/see.png" style="width: 25px;height: 25px;"/>
 						<span>{{liveInfo.viewer}}</span>
@@ -165,7 +179,7 @@
 								step
 								max="99"
 								min="1"
-								style="width: 50px;height: 30px;"
+								style="width: 50px;height: 30px;margin: 0 10px"
 								/>
 							<!--添加-->
 							<img src="../../assets/img/increase.png" 
@@ -208,7 +222,7 @@
 
 <script>
 	import flvjs from 'flv.js'
-	import {mapState} from 'vuex'
+	import {mapState,mapActions} from 'vuex'
 	export default{
 		name:'Live',
 		data(){
@@ -228,7 +242,7 @@
 				giftRecord:{
 					count:1,
 				},
-				giftRankingData:[]
+				giftRankingData:[],
 			}
 		},
 		computed:{
@@ -236,8 +250,8 @@
 			liveUrl(){
 				return '/live?app=myapp&stream='+this.liveInfo.id;
 			},
-			liveId(){
-				return this.$route.query.liveId;
+			userId(){
+				return this.$route.query.userId;
 			},
 		},
 		mounted(){
@@ -250,7 +264,7 @@
 				return
 			}
  		  	 this.sockets.unsubscribe('liveroomChat')
- 		  	 this.$socket.emit("leaveliveroom")
+ 		  	 this.$socket.emit("leaveliveroom",this.userId)
 		},
 		sockets: {
         connect: function () {
@@ -262,6 +276,7 @@
 
     },
 		methods:{
+			...mapActions(['aFollowLive','aCancelFollowLive']),
 			initGiftData(){
 				this.$store.dispatch('aGiftByValueAsc')
 			},
@@ -283,19 +298,47 @@
 					}
 				)
 			},
-			initLiveRoom(){
+			initLiveRoomIsFollow(){
+				if(this.currentUser==null){
+					return;
+				}
 				this.$axios({
 					method:'POST',
-					url:'/api/liveroom/queryById',
+					url:'api/liveRoomFollow/isFollow',
 					params:{
-						id:this.liveId
+						userId:this.currentUser.id,
+						liveUserId:this.userId
+					},
+					headers:{
+						authorization:localStorage.getItem("token")
 					}
 				}).then(
 					response=>{
 						if(response.data.success){
+							console.log('follow-->',response.data.data)
+							this.liveInfo.follow=response.data.data
+						}
+					}
+				)
+			},
+			initLiveRoom(){
+				this.$axios({
+					method:'POST',
+					url:'api/liveroom/queryByUserId',
+					params:{
+						userId:this.userId
+					},
+					headers:{
+						authorization:localStorage.getItem("token")
+					}
+				}).then(
+					response=>{
+						if(response.data.success){
+							console.log("liveInfo-->",response.data.data)
 							this.liveInfo=response.data.data
 							this.initFlvPlayer()
 							this.initGiftRankingData()
+							//this.initLiveRoomIsFollow()
 						}else{
 							this.$message.info(response.data.message)
 						}
@@ -321,10 +364,9 @@
 		/*初始化vue-socketio*/
 		initSocketIO(){
 			/*加入直播间事件*/
-			this.$socket.emit('joinLiveRoom',this.liveId);
+			this.$socket.emit('joinLiveRoom',this.userId);
 			this.sockets.subscribe('liveroomChat',(res)=>{
 				this.chatMessage.push(res)
-				console.log(this.chatMessage)
 			});
 			
 		},
@@ -390,12 +432,31 @@
 						this.$socket.emit('sendGiftMessage',response.data.data)
 						/*更新当前用户信息*/
 						this.$store.dispatch('aCurrentUser')
+						this.initGiftRankingData()
 					}else{
 						this.$message.info(response.data.message)
 					}
 				}
 			)
-		}
+		},
+		/*关注直播间*/
+		handlerFollowLiveRoom(){
+				this.$axios({
+					method:'POST',
+					url:'api/liveRoomFollow/follow',
+					headers:{
+						authorization:localStorage.getItem("token")
+					}
+				}).then(
+					response=>{
+						if(response.data.success){
+							this.$message.success("关注成功")
+						}else{
+							this.$message.info(response.data.message)
+						}
+					}
+				)
+			},
 	}
 	}
 </script>
@@ -452,7 +513,14 @@
 		top:10px;
 		font-size: 14px;
 	}
-	
+	.followBtn{
+		height: 100%;
+		width:60px;
+		float: right;
+		border: none;
+		border-radius: 15px;
+		cursor: pointer;
+	}
 	#live-right{
 		display: inline-block;
 		position: relative;
@@ -500,6 +568,7 @@
 	}
 	#live-left-video{
 		float: left;
+		background: #000000;
 	}
 	.live-left-bottom{
 		background: #2D2E36;

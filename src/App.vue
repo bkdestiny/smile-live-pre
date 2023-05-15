@@ -15,7 +15,7 @@ export default {
   },
   mounted(){
   	this.initSocketIO()
-  	this.autoLogin()
+  	this.initApp()
   },
   methods:{
   	initSocketIO(){
@@ -27,7 +27,7 @@ export default {
        		 	 console.log("断开连接")
         });
   	},
-  	autoLogin(){
+  	initApp(){
   		this.$store.dispatch('aCurrentUser')
   	}
   }

@@ -11,6 +11,7 @@ import PersonalCenter from '../pages/HomeModule/PersonalCenter'
 /*个人中心*/
 import MyProfile from '../pages/PersonalCenterModule/MyProfile'
 import MyAvatar from '../pages/PersonalCenterModule/MyAvatar'
+import MyWallet from '../pages/PersonalCenterModule/MyWallet'
 const router=new VueRouter({
 	routes:[
 	{
@@ -46,6 +47,11 @@ const router=new VueRouter({
 						name:'myavatar',
 						path:'/personalcenter/myavatar',
 						component:MyAvatar
+					},
+					{
+						name:'mywallet',
+						path:'/personalcenter/mywallet',
+						component:MyWallet
 					}
 				]
 			}

@@ -36,10 +36,11 @@
 		data(){
 			return{
 				currentModule:
-				{name:'我的资料',label:'myprofile',imgSrc:require('@/assets/img/personal.png')},
+				{name:'我的资料',label:'myprofile',imgSrc:require('@/assets/img/personal-blue.png')},
 				modules:[
-				{name:'我的资料',label:'myprofile',imgSrc:require('@/assets/img/personal.png')},
-				{name:'我的头像',label:'myavatar',imgSrc:require('@/assets/img/personal.png')}
+				{name:'我的资料',label:'myprofile',imgSrc:require('@/assets/img/personal-blue.png')},
+				{name:'我的头像',label:'myavatar',imgSrc:require('@/assets/img/avatar-blue.png')},
+				{name:'我的钱包',label:'mywallet',imgSrc:require('@/assets/img/wallet-blue.png')}
 				]
 			}
 		},

@@ -6,8 +6,45 @@ import router from '../router'
 Vue.use(Vuex)
 //用于响应组件中的动作
 const actions={
+		aLoginByPassword(context,loginForm){
+			axios({
+					method:'POST',
+					url:'api/user/loginByPassword',
+					data:loginForm,
+				}).then(
+					response=>{
+						if(response.data.success){
+							localStorage.setItem("token",response.data.data)
+							location.reload()
+						}else{
+							alert(response.data.message)
+						}
+					},
+					error=>{
+						
+					}
+				)
+	},
+	aLogout(){
+		axios({
+			method:'POST',
+			url:'api/user/logout',
+			headers:{
+				authorization:localStorage.getItem("token")
+			}
+		}).then(
+			response=>{
+				if(response.data.success){
+					localStorage.removeItem("token")
+					location.reload()
+				}
+			}
+		)
+	},
 	aCurrentUser(context){
-		if(localStorage.getItem("token")!=null){
+		if(localStorage.getItem("token")==null){
+			return;	
+		}
   			axios({
   				method:'GET',
   				url:'/api/user/currentUser',
@@ -18,10 +55,31 @@ const actions={
   				response=>{
   					if(response.data.success){
   						context.commit('mCurrentUser',response.data.data)
+  					 	context.dispatch('aLiveRoomFollow')
   					}
   				}
   			)
-  		}
+	},
+	aLiveRoomFollow(context){
+		if(context.state.currentUser==null){
+			return;
+		}
+				axios({
+					method:'GET',
+					url:'api/liveRoomFollow/queryByUserId',
+					params:{
+						userId:context.state.currentUser.id
+					},
+					headers:{
+						authorization:localStorage.getItem("token")
+					}
+				}).then(
+					response=>{
+						if(response.data.success){
+							context.commit('mLiveRoomFollow',response.data.data)
+						}
+					}
+				)
 	},
 	aGiftByValueAsc(context){
 		axios({
@@ -36,6 +94,72 @@ const actions={
 				}
 			}
 		)
+	},
+	aIntoLiveRoom(context,userId){
+				router.replace({
+					name:'live',
+					query:{
+						userId:userId
+					}
+				})
+	},
+	aFollowLive(context,liveInfo){
+		console.log("f-->",liveInfo)
+		if(context.state.currentUser==null){
+			alert("请先登录")
+			return;
+		}
+		axios({
+			method:'POST',
+			url:'api/liveRoomFollow/follow',
+			params:{
+				userId:context.state.currentUser.id,
+				liveUserId:liveInfo.userId
+			},
+			headers:{
+				authorization:localStorage.getItem("token")
+			}
+		}).then(
+			response=>{
+				if(response.data.success){
+					alert('关注成功')
+					liveInfo.follow=true;
+					liveInfo.followCount+=1;
+					context.dispatch('aLiveRoomFollow')
+				}else{
+					alert(response.data.message)
+				}
+			}
+		)
+	},
+	aCancelFollowLive(context,liveInfo){
+		console.log("f-->",liveInfo)
+		if(context.state.currentUser==null){
+			alert("请先登录")
+			return;
+		}
+		axios({
+			method:'POST',
+			url:'api/liveRoomFollow/cancelFollow',
+			params:{
+				userId:context.state.currentUser.id,
+				liveUserId:liveInfo.userId
+			},
+			headers:{
+				authorization:localStorage.getItem("token")
+			}
+		}).then(
+			response=>{
+				if(response.data.success){
+					alert("取消关注成功")
+					liveInfo.follow=false
+					liveInfo.followCount-=1;
+					context.dispatch('aLiveRoomFollow')
+				}else{
+					alert(response.data.message)
+				}
+			}
+		)
 	}
 }
 //用于操作数据
@@ -46,17 +170,14 @@ const mutations={
 	mGiftByValueAsc(state,data){
 		state.giftData=data
 	},
-
+	mLiveRoomFollow(state,data){
+		state.liveRoomFollow=data
+	},
 	
 /*	SOCKET_chatevent(state,data){
 		console.log('vuex -->',data)
 		state.message.push(data)
 	},*/
-	SOCKET_currentUser(state,data){
-		if(data.success){
-			state.currentUser=data.data;
-		}
-	}
 }
 //用于将state中的数据进行加工
 const getters={
@@ -64,7 +185,8 @@ const getters={
 }
 const state={
 	currentUser:null,
-	giftData:null
+	giftData:null,
+	liveRoomFollow:null,
 }
 
 export default new Vuex.Store({
